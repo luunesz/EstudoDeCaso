@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transporte Escolar - painel de presenças</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --cream:#F6EDE3; --paper:#FFFBF5; --brown:#8B4A17; --orange:#DB8D45;
+  --coral:#E4795B; --navy:#2E3A46; --ink:#3A2A1E; --soft:#7A6552; --line:#EAD9C6;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif; color:var(--ink); line-height:1.5;
+  background:var(--cream);
+  background-image:repeating-linear-gradient(transparent 0 33px, rgba(139,74,23,.08) 33px 34px);
+  height:100vh; height:100dvh; overflow:hidden; padding:18px 24px;
+}
+body::before{ /* margem de caderno */
+  content:""; position:fixed; top:0; bottom:0; left:56px; width:2px;
+  background:rgba(228,121,91,.35); pointer-events:none;
+}
+.wrap{max-width:1180px; height:100%; margin:0 auto; position:relative; display:flex; flex-direction:column}
+
+/* cabeçalho no estilo do slide */
+.topo{
+  display:flex; align-items:center; gap:18px; flex-wrap:wrap; background:var(--paper);
+  border:2px solid var(--line); border-radius:20px; padding:12px 20px 12px 12px;
+  box-shadow:0 5px 0 var(--line); margin-bottom:16px; flex:none;
+  animation:entrar .7s ease-out both;
+}
+.topo-arte{flex:none; width:80px; background:var(--orange); border-radius:14px; padding:10px 8px 4px}
+.topo-arte svg{display:block; width:100%; height:auto}
+.topo h1{
+  font-family:'Fraunces',serif; font-weight:900; color:var(--brown);
+  font-size:clamp(1.3rem,3vw,1.9rem); line-height:1.1;
+}
+.topo p{color:var(--soft); font-size:.95rem}
+.fonte{margin-left:auto; padding:6px 14px; border-radius:999px;
+  background:var(--cream); border:2px dashed var(--orange); font-weight:800; font-size:.9rem; color:var(--brown)}
+
+/* cartões de indicadores */
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px; flex:none}
+.kpi{
+  background:var(--paper); border:2px solid var(--line); border-radius:20px;
+  padding:10px 18px 12px; position:relative; box-shadow:0 5px 0 var(--line);
+  border-top:8px solid var(--cor);
+}
+.kpi .emoji{font-size:1.3rem; float:right; margin-top:2px}
+.kpi h2{font-size:1rem; font-weight:800; color:var(--soft)}
+.kpi .num{font-family:'Fraunces',serif; font-weight:900; font-size:clamp(1.9rem,5.5vh,2.7rem); line-height:1.1; color:var(--cor)}
+.kpi small{color:var(--soft); font-size:.85rem}
+
+/* gráficos */
+.graficos{display:grid; grid-template-columns:3fr 2fr; gap:16px; flex:1; min-height:0; padding-bottom:6px}
+.card{
+  background:var(--paper); border:2px solid var(--line); border-radius:24px;
+  padding:16px 20px 14px; box-shadow:0 5px 0 var(--line);
+  display:flex; flex-direction:column; min-height:0;
+}
+.card h3{font-family:'Fraunces',serif; font-size:1.25rem; color:var(--brown); margin-bottom:0}
+.card .leg{color:var(--soft); font-size:.9rem; margin-bottom:8px}
+.area{position:relative; flex:1; min-height:0}
+
+.aviso{display:none; flex:none; margin-bottom:14px; padding:14px 18px; border-radius:16px;
+  background:#FCE3DA; border:2px solid var(--coral); color:#7A2E1A; font-weight:600}
+.aviso.mostrar{display:block}
+
+@keyframes entrar{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){.topo{animation:none}}
+@media (max-width:1000px){.kpi .num{font-size:2rem}.topo p{display:none}}
+@media (max-width:900px), (max-height:540px){
+  body{height:auto; overflow:auto}
+  .wrap{height:auto}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .graficos{grid-template-columns:1fr}
+  .area{flex:none; height:280px}
+  .fonte{margin-left:0}
+  body::before{left:14px}
+}
+@media (max-width:480px){.kpis{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topo">
+    <div class="topo-arte" aria-hidden="true">
+      <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="22" width="288" height="96" rx="20" fill="#FBE3CB"/>
+        <rect x="6" y="84" width="288" height="34" rx="14" fill="#E4795B"/>
+        <rect x="22" y="36" width="52" height="46" rx="8" fill="#2E3A46"/>
+        <rect x="84" y="36" width="48" height="36" rx="6" fill="#2E3A46"/>
+        <rect x="140" y="36" width="48" height="36" rx="6" fill="#2E3A46"/>
+        <rect x="196" y="36" width="48" height="36" rx="6" fill="#2E3A46"/>
+        <rect x="252" y="36" width="30" height="36" rx="6" fill="#2E3A46"/>
+        <circle cx="70" cy="122" r="22" fill="#2E3A46"/><circle cx="70" cy="122" r="9" fill="#F6EDE3"/>
+        <circle cx="224" cy="122" r="22" fill="#2E3A46"/><circle cx="224" cy="122" r="9" fill="#F6EDE3"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Painel de presenças</h1>
+      <p>Transporte Escolar: quem embarcou e quanto cada aluno aproveitou</p>
+    </div>
+    <span class="fonte" id="fonte">carregando dados...</span>
+  </header>
+
+  <div class="aviso" id="aviso"></div>
+
+  <section class="kpis" aria-label="Indicadores">
+    <article class="kpi" style="--cor:var(--brown)">
+      <span class="emoji">🎒</span><h2>Alunos inscritos</h2>
+      <div class="num" id="k-inscritos">-</div><small>cadastrados nas rotas</small>
+    </article>
+    <article class="kpi" style="--cor:var(--orange)">
+      <span class="emoji">⭐</span><h2>Aproveitamento</h2>
+      <div class="num" id="k-proveito">-</div><small>das viagens foram usadas</small>
+    </article>
+    <article class="kpi" style="--cor:var(--coral)">
+      <span class="emoji">🗓️</span><h2>Viagens na semana</h2>
+      <div class="num" id="k-semana">-</div><small>nos últimos 7 dias</small>
+    </article>
+    <article class="kpi" style="--cor:var(--navy)">
+      <span class="emoji">🚌</span><h2>Alunos por viagem</h2>
+      <div class="num" id="k-media">-</div><small>média de embarques</small>
+    </article>
+  </section>
+
+  <section class="graficos">
+    <div class="card">
+      <h3>Presenças por dia</h3>
+      <p class="leg">Quantos alunos embarcaram em cada dia</p>
+      <div class="area"><canvas id="g-dia" role="img" aria-label="Gráfico de barras com o total de presenças por dia"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Quem precisa de atenção</h3>
+      <p class="leg">Alunos inscritos com menos de 60% de presença</p>
+      <div class="area"><canvas id="g-pizza" role="img" aria-label="Gráfico de pizza dos alunos abaixo e acima de 60% de presença"></canvas></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ===== CONFIGURAÇÃO: cole aqui os dados do seu projeto Supabase ===== */
+const PROJETO = "https://fizriyrahjqjagrbqovp.supabase.co/rest/v1/";
+const CHAVE   = "sb_publishable_YZSmJQ2RDKZDjfFMgDD63Q_FO3IWhw5";
+/* ==================================================================== */
+
+const $ = id => document.getElementById(id);
+const fmt = (n, d = 1) => Number(n).toLocaleString('pt-BR', { maximumFractionDigits: d });
+
+async function ler(view) {
+  const r = await fetch(`${PROJETO}${view}?select=*`, {
+    headers: { apikey: CHAVE, Authorization: 'Bearer ' + CHAVE }
+  });
+  if (!r.ok) throw new Error(`${view} respondeu ${r.status}`);
+  return r.json();
+}
+
+function mostrarAviso(txt, classe) {
+  const el = $('aviso'); el.textContent = txt; el.className = 'aviso mostrar ' + (classe || '');
+}
+
+function montar(pres, alu) {
+  const viagens = new Set(pres.map(p => p.viagem.trim()));
+  const nv = viagens.size, ni = alu.length;
+
+  /* cartões */
+  const dias = {};
+  pres.forEach(p => dias[p.data_presenca] = (dias[p.data_presenca] || 0) + 1);
+  const datas = Object.keys(dias).sort();
+  const ms = d => Date.parse(d + 'T00:00:00Z');
+  const fim = datas.length ? ms(datas[datas.length - 1]) : 0;
+  const semana = new Set(pres.filter(p => fim - ms(p.data_presenca) < 7 * 864e5).map(p => p.viagem.trim())).size;
+  const somaAlu = alu.reduce((s, a) => s + a.total_presencas, 0);
+
+  $('k-inscritos').textContent = fmt(ni, 0);
+  $('k-proveito').textContent = ni && nv ? fmt(100 * somaAlu / (ni * nv)) + '%' : '0%';
+  $('k-semana').textContent = fmt(semana, 0);
+  $('k-media').textContent = nv ? fmt(pres.length / nv) : '0';
+  $('fonte').textContent = datas.length
+    ? 'dados até ' + datas[datas.length - 1].split('-').reverse().join('/') : 'sem presenças registradas';
+
+  Chart.defaults.font.family = "'Nunito', sans-serif";
+  Chart.defaults.color = '#7A6552';
+
+  /* barras: presenças por dia */
+  new Chart($('g-dia'), {
+    type: 'bar',
+    data: {
+      labels: datas.map(d => d.split('-').reverse().slice(0, 2).join('/')),
+      datasets: [{ label: 'Presenças', data: datas.map(d => dias[d]),
+        backgroundColor: '#DB8D45', hoverBackgroundColor: '#8B4A17', borderRadius: 12, maxBarThickness: 64 }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EAD9C6' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  /* pizza: abaixo de 60% */
+  const abaixo = alu.filter(a => nv && 100 * a.total_presencas / nv < 60).length;
+  new Chart($('g-pizza'), {
+    type: 'pie',
+    data: {
+      labels: ['Abaixo de 60%', '60% ou mais'],
+      datasets: [{ data: [abaixo, ni - abaixo], backgroundColor: ['#E4795B', '#2E3A46'],
+        borderColor: '#FFFBF5', borderWidth: 5 }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 18, font: { weight: '700' } } } }
+    }
+  });
+}
+
+(async () => {
+  try {
+    if (PROJETO.includes('<projeto>') || CHAVE.includes('<chave')) {
+      throw new Error('preencha PROJETO e CHAVE no início do script');
+    }
+    const [pres, alu] = await Promise.all([ler('vw_dash_presenca'), ler('vw_dash_aluno')]);
+    montar(pres, alu);
+  } catch (e) {
+    $('fonte').textContent = 'erro ao carregar';
+    mostrarAviso('Não foi possível ler o banco: ' + e.message + '. Confira PROJETO, CHAVE e o GRANT SELECT para anon.');
+  }
+})();
+</script>
+</body>
+</html>

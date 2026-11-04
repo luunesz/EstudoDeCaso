@@ -1,0 +1,81 @@
+-> Create View
+
+CREATE VIEW vw_dash_presenca AS
+SELECT p.fk_viagem_id AS viagem, p.data_presenca, a.serie
+FROM presenca p
+JOIN aluno a ON a.cpf = p.fk_aluno_cpf;
+
+GRANT SELECT ON vw_dash_presenca TO anon;
+
+CREATE VIEW vw_dash_aluno AS
+SELECT a.serie, COUNT(p.fk_viagem_id) AS total_presencas
+FROM aluno a
+LEFT JOIN presenca p ON p.fk_aluno_cpf = a.cpf
+WHERE a.cpf IN (SELECT fk_aluno_cpf FROM inscrito)
+GROUP BY a.cpf, a.serie;
+
+GRANT SELECT ON vw_dash_aluno TO anon;
+
+-> INSERT
+
+-- 1) 11 alunos (o aluno 11 nunca vai embarcar)
+INSERT INTO aluno (cpf, nome, idade, serie)
+SELECT lpad((90000000000 + g)::text, 11, '0'),
+       'Aluno Teste ' || g,
+       6 + (g % 12),
+       (ARRAY['1º ano','2º ano','3º ano','4º ano','5º ano',
+              '6º ano','7º ano','8º ano','9º ano'])[1 + (g % 9)]
+FROM generate_series(1, 11) g;
+
+-- 2) 6 viagens, uma por dia, de 01/10 a 07/10/2026
+INSERT INTO viagem (id, status_viagem)
+SELECT 'V' || lpad(g::text, 9, '0'), 'concluida'
+FROM generate_series(1, 6) g;
+
+-- 3) Uma rota e todos os alunos inscritos nela
+INSERT INTO rota (id) VALUES ('R000000001');
+
+INSERT INTO inscrito (fk_aluno_cpf, fk_rota_id)
+SELECT cpf, 'R000000001'
+FROM aluno
+WHERE cpf LIKE '9000000%';
+
+-- 4) Presenças: cada aluno (1 a 10) vai em algumas viagens, não em todas
+INSERT INTO presenca (fk_viagem_id, fk_aluno_cpf, data_presenca, horario_presenca)
+SELECT 'V' || lpad(v::text, 9, '0'),
+       lpad((90000000000 + a)::text, 11, '0'),
+       DATE '2026-10-07' - (6 - v),
+       TIME '06:30' + ((a * 7 + v * 3) % 30) * INTERVAL '1 minute'
+FROM generate_series(1, 6)  v,
+     generate_series(1, 10) a
+WHERE ((a * 5 + v) % 6) < (1 + a % 6);
+
+-> Teste da View
+
+curl.exe "https://fizriyrahjqjagrbqovp.supabase.co/rest/v1/vw_dash_aluno?select=*&order=total_presencas.desc&limit=2" -H "apikey: sb_publishable_YZSmJQ2RDKZDjfFMgDD63Q_FO3IWhw5"
+
+Resposta:	[{"serie":"6º ano","total_presencas":6},
+ 		{"serie":"5º ano","total_presencas":5}]
+
+curl.exe "https://fizriyrahjqjagrbqovp.supabase.co/rest/v1/vw_dash_presenca?select=*&order=data_presenca&limit=2" -H "apikey: sb_publishable_YZSmJQ2RDKZDjfFMgDD63Q_FO3IWhw5"
+
+Resposta:	[{"viagem":"V000000001","data_presenca":"2026-10-02","serie":"5º ano"},
+ 		{"viagem":"V000000001","data_presenca":"2026-10-02","serie":"2º ano"}]
+
+const URL = 'https://fizriyrahjqjagrbqovp.supabase.co/rest/v1';
+const r = await fetch(`${URL}/vw_dash_presenca?select=*`,
+  { headers: { apikey: sb_publishable_YZSmJQ2RDKZDjfFMgDD63Q_FO3IWhw5" } });
+if (!r.ok) throw new Error(`HTTP ${r.status}`);
+const presencas = await r.json();
+
+// cada cartão é um cálculo sobre o mesmo array
+const viagens = new Set(presencas.map(x => x.viagem)).size;
+const mediaPorViagem = presencas.length / viagens;
+
+COMANDOS PARA A IA
+
+"agora por ultimo, me faça um site acolhedor com tema escola, seguindo a paleta de cores do meu slide (foto acima), deixe bem bonito
+pera lá, quero um dashboard, e eu quero que o codigo tenha a area ( const PROJETO = "https://<projeto>.supabase.co/rest/v1/";
+    const CHAVE   = "<chave-publicável>";) para que eu coloque o meu banco de dados
+porque ####### o slide tem dados, eu quero que os dados sejam tirados do meu banco
+assim está bom, so faça o seguinte, quero que deixe em um formato onde eu não precise abaixar e subir a pagina, sendo ela imovel"

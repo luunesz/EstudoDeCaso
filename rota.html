@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#212224">
+  <title>Gestão de Rotas - Transporte Escolar</title>
+  <style>
+    :root {
+      --bg: #212224;
+      --surface: #1e1e1e;
+      --surface-hover: #282828;
+      --border: #333333;
+      --text: #ffffff;
+      --muted: #a1a1aa;
+      --subtle: #71717a;
+
+      --green-text: #4ade80;
+      --green-bg: rgba(34, 197, 94, 0.12);
+      --amber-text: #eab308;
+      --amber-bg: rgba(234, 179, 8, 0.12);
+      --red-text: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --neutral-type-text: #e4e4e7;
+      --neutral-type-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 30px 22px;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    .main-card {
+      background: #1e1f21;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    }
+
+    .main-card-header {
+      background: #1e293b;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .main-card-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .page-heading { margin-bottom: 0; }
+    .page-heading h1 {
+      margin: 0;
+      font-size: clamp(20px, 3vw, 24px);
+      letter-spacing: -0.5px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .page-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .kpi-card {
+      min-width: 0;
+      padding: 19px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    .kpi-title {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .kpi-value {
+      margin: 12px 0 5px;
+      color: var(--text);
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 750;
+    }
+    .kpi-subtext { color: var(--subtle); font-size: 12px; }
+    .kpi-card.active .kpi-value { color: var(--green-text); }
+    .kpi-card.urban .kpi-value { color: var(--text); }
+    .kpi-card.rural .kpi-value { color: var(--text); }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, .82fr) minmax(0, 1.55fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    .panel-heading {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-heading h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 650;
+    }
+    .panel-heading p {
+      margin: 7px 0 0;
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .distribution { padding: 22px; }
+    .distribution-item { margin-bottom: 24px; }
+    .distribution-item:last-child { margin-bottom: 4px; }
+    .distribution-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: #d4d4d8;
+      font-size: 13px;
+    }
+    .distribution-label strong { color: var(--text); }
+    .bar-track {
+      height: 10px;
+      overflow: hidden;
+      background: #09090b;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    .bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      transition: width .35s ease;
+    }
+    .bar-fill.urban { background: #71717a; }
+    .bar-fill.rural { background: var(--amber-text); }
+    .bar-fill.active-bar { background: var(--green-text); }
+    .bar-fill.inactive-bar { background: var(--red-text); }
+
+    .distribution-note {
+      margin: 23px 0 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      color: var(--subtle);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .table-panel { display: flex; flex-direction: column; }
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      width: min(270px, 100%);
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+    }
+    .search-box::placeholder { color: var(--subtle); }
+    .search-box:focus { border-color: var(--muted); }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table {
+      width: 100%;
+      min-width: 610px;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      padding: 15px 16px;
+      background: #171717;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 16px 16px;
+      color: #e4e4e7;
+      font-size: 13px;
+      line-height: 1.45;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody tr:hover td { background: var(--surface-hover); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .route-id { color: var(--text); font-weight: 700; }
+    
+    .badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .badge-ativa {
+      color: var(--green-text);
+      background: var(--green-bg);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .badge-inativa {
+      color: var(--red-text);
+      background: var(--red-bg);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .badge-tipo {
+      color: var(--neutral-type-text);
+      background: var(--neutral-type-bg);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .message {
+      padding: 25px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .message.error { color: var(--red-text); font-weight: 500; background: rgba(239, 68, 68, 0.08); border-radius: 6px; margin: 15px; }
+    .footer-info {
+      margin-top: auto;
+      padding: 13px 20px;
+      text-align: right;
+      color: var(--subtle);
+      background: #171717;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 18px 10px; }
+      .main-card-header { padding: 12px 14px; }
+      .main-card-body { padding: 14px 10px; gap: 13px; }
+      .page-heading h1 { font-size: 18px; }
+      .page-subtitle { font-size: 10px; }
+
+      .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+      .kpi-card { padding: 12px 7px; border-radius: 8px; }
+      .kpi-title { font-size: 8px; letter-spacing: .25px; }
+      .kpi-value { margin: 9px 0 4px; font-size: 23px; }
+      .kpi-subtext { font-size: 9px; }
+
+      .content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .panel { border-radius: 8px; }
+      .panel-heading { padding: 13px 10px; }
+      .panel-heading h2 { font-size: 13px; }
+      .panel-heading p { font-size: 10px; }
+      .distribution { padding: 13px 10px; }
+      .distribution-label { font-size: 10px; }
+      .distribution-note { margin-top: 16px; padding-top: 11px; font-size: 9px; }
+
+      .table-toolbar { align-items: stretch; }
+      .search-box { width: 100%; padding: 9px 10px; font-size: 11px; }
+
+      table { table-layout: fixed; min-width: 0; }
+      th { padding: 10px 4px; font-size: 8px; }
+      td { padding: 11px 4px; font-size: 9px; }
+      .badge { padding: 4px 6px; font-size: 9px; }
+      .footer-info { padding: 10px 8px; font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="main-card">
+      <header class="main-card-header">
+        <div class="page-heading">
+          <h1>🚌 Gestão de Rotas</h1>
+          <p class="page-subtitle">Acompanhamento e situação das rotas cadastradas</p>
+        </div>
+      </header>
+
+      <div class="main-card-body">
+        <section class="kpi-grid" aria-label="Indicadores de rotas">
+          <article class="kpi-card">
+            <div class="kpi-title">Total de rotas</div>
+            <div class="kpi-value" id="kpi-total">0</div>
+            <div class="kpi-subtext">Cadastradas no banco</div>
+          </article>
+          <article class="kpi-card active">
+            <div class="kpi-title">Rotas ativas</div>
+            <div class="kpi-value" id="kpi-ativas">0</div>
+            <div class="kpi-subtext" id="kpi-ativas-pct">0% do total</div>
+          </article>
+          <article class="kpi-card urban">
+            <div class="kpi-title">Rotas urbanas</div>
+            <div class="kpi-value" id="kpi-urbanas">0</div>
+            <div class="kpi-subtext">Tipo urbana</div>
+          </article>
+          <article class="kpi-card rural">
+            <div class="kpi-title">Rotas rurais</div>
+            <div class="kpi-value" id="kpi-rurais">0</div>
+            <div class="kpi-subtext">Tipo rural</div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="left-column">
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Distribuição por tipo</h2>
+                <p>Quantidade por tipo de trajeto</p>
+              </div>
+              <div class="distribution">
+                <div class="distribution-item">
+                  <div class="distribution-label">
+                    <span>Urbanas</span>
+                    <strong id="urbanas-label">0 (0%)</strong>
+                  </div>
+                  <div class="bar-track"><div class="bar-fill urban" id="urbanas-bar"></div></div>
+                </div>
+                <div class="distribution-item">
+                  <div class="distribution-label">
+                    <span>Rurais</span>
+                    <strong id="rurais-label">0 (0%)</strong>
+                  </div>
+                  <div class="bar-track"><div class="bar-fill rural" id="rurais-bar"></div></div>
+                </div>
+                <p class="distribution-note" id="distribution-note">A distribuição será atualizada quando os dados forem carregados.</p>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Distribuição por status</h2>
+                <p>Quantidade por situação da rota</p>
+              </div>
+              <div class="distribution">
+                <div class="distribution-item">
+                  <div class="distribution-label">
+                    <span>Ativas</span>
+                    <strong id="ativas-label">0 (0%)</strong>
+                  </div>
+                  <div class="bar-track"><div class="bar-fill active-bar" id="ativas-bar"></div></div>
+                </div>
+                <div class="distribution-item">
+                  <div class="distribution-label">
+                    <span>Inativas</span>
+                    <strong id="inativas-label">0 (0%)</strong>
+                  </div>
+                  <div class="bar-track"><div class="bar-fill inactive-bar" id="inativas-bar"></div></div>
+                </div>
+                <p class="distribution-note" id="status-note">A distribuição por status será atualizada com os dados.</p>
+              </div>
+            </article>
+          </div>
+
+          <article class="panel table-panel">
+            <div class="panel-heading">
+              <div class="table-toolbar">
+                <div>
+                  <h2>Rotas cadastradas</h2>
+                  <p>Consulte os trajetos e horários do transporte escolar</p>
+                </div>
+                <input
+                  type="search"
+                  id="searchInput"
+                  class="search-box"
+                  placeholder="Pesquisar rota..."
+                  aria-label="Pesquisar rotas"
+                  oninput="filtrarTabela()"
+                >
+              </div>
+            </div>
+
+            <div id="loading" class="message">Carregando dados do Supabase...</div>
+            <div id="error" class="message error" hidden></div>
+
+            <div id="tabela-container" hidden>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID rota</th>
+                      <th>Tipo</th>
+                      <th>Status</th>
+                      <th>Saída → chegada</th>
+                      <th>Horários</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-rotas"></tbody>
+                </table>
+              </div>
+              <div id="empty-filter" class="message" hidden>Nenhuma rota corresponde à pesquisa.</div>
+            </div>
+            <div class="footer-info">Conectado ao Supabase &amp; PostgreSQL · vw_dash_rota</div>
+          </article>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://olbydwtlrqofifnfkaol.supabase.co/rest/v1';
+    const PUBLIC_KEY = 'sb_publishable_ZdtH2FkCoBvTrZlmgGrB8A_K119gljd';
+
+    let todasAsRotas = [];
+
+    const normalizar = valor => String(valor ?? '').trim().toLowerCase();
+    const formatarHorario = valor => valor ? String(valor).slice(0, 8) : '--:--';
+
+    async function carregarDados() {
+      const loadingEl = document.getElementById('loading');
+      const errorEl = document.getElementById('error');
+      const containerEl = document.getElementById('tabela-container');
+
+      try {
+        const resposta = await fetch(`${SUPABASE_URL}/vw_dash_rota?select=*`, {
+          headers: {
+            apikey: PUBLIC_KEY,
+            Authorization: `Bearer ${PUBLIC_KEY}`
+          }
+        });
+
+        if (!resposta.ok) {
+          throw new Error(`Erro HTTP: ${resposta.status} - ${resposta.statusText}`);
+        }
+
+        const dadosBrutos = await resposta.json();
+        if (!Array.isArray(dadosBrutos)) throw new Error('A resposta recebida não está no formato esperado.');
+
+        todasAsRotas = dadosBrutos.filter(r => normalizar(r.tipo) !== 'mista' && normalizar(r.tipo) !== 'misto');
+
+        atualizarKPIs(todasAsRotas);
+        atualizarDistribuicao(todasAsRotas);
+        exibirTabela(todasAsRotas);
+
+        loadingEl.hidden = true;
+        containerEl.hidden = false;
+
+        if (todasAsRotas.length === 0) {
+          document.getElementById('empty-filter').hidden = false;
+          document.getElementById('empty-filter').textContent = 'Ainda não há rotas cadastradas.';
+        }
+      } catch (err) {
+        loadingEl.hidden = true;
+        errorEl.hidden = false;
+        errorEl.textContent = `❌ Erro de ligação: ${err.message}. Verifique se a View e o comando GRANT SELECT foram aplicados no Supabase.`;
+      }
+    }
+
+    function atualizarKPIs(dados) {
+      const total = dados.length;
+      const ativas = dados.filter(r => normalizar(r.status_rota) === 'ativa').length;
+      const urbanas = dados.filter(r => normalizar(r.tipo) === 'urbana').length;
+      const rurais = dados.filter(r => normalizar(r.tipo) === 'rural').length;
+
+      document.getElementById('kpi-total').textContent = total;
+      document.getElementById('kpi-ativas').textContent = ativas;
+      document.getElementById('kpi-ativas-pct').textContent =
+        `${total ? Math.round(ativas / total * 100) : 0}% do total`;
+      document.getElementById('kpi-urbanas').textContent = urbanas;
+      document.getElementById('kpi-rurais').textContent = rurais;
+    }
+
+    function atualizarDistribuicao(dados) {
+      const total = dados.length;
+      const urbanas = dados.filter(r => normalizar(r.tipo) === 'urbana').length;
+      const rurais = dados.filter(r => normalizar(r.tipo) === 'rural').length;
+      
+      const ativas = dados.filter(r => normalizar(r.status_rota) === 'ativa').length;
+      const inativas = dados.filter(r => normalizar(r.status_rota) !== 'ativa').length;
+
+      const pctUrbanas = total ? Math.round(urbanas / total * 100) : 0;
+      const pctRurais = total ? Math.round(rurais / total * 100) : 0;
+      const pctAtivas = total ? Math.round(ativas / total * 100) : 0;
+      const pctInativas = total ? Math.round(inativas / total * 100) : 0;
+
+      document.getElementById('urbanas-label').textContent = `${urbanas} (${pctUrbanas}%)`;
+      document.getElementById('rurais-label').textContent = `${rurais} (${pctRurais}%)`;
+      document.getElementById('urbanas-bar').style.width = `${pctUrbanas}%`;
+      document.getElementById('rurais-bar').style.width = `${pctRurais}%`;
+      document.getElementById('distribution-note').textContent = total
+        ? `${urbanas} rota(s) urbana(s) e ${rurais} rota(s) rural(is), de um total de ${total} rota(s).`
+        : 'Não há rotas cadastradas para exibir na distribuição.';
+
+      document.getElementById('ativas-label').textContent = `${ativas} (${pctAtivas}%)`;
+      document.getElementById('inativas-label').textContent = `${inativas} (${pctInativas}%)`;
+      document.getElementById('ativas-bar').style.width = `${pctAtivas}%`;
+      document.getElementById('inativas-bar').style.width = `${pctInativas}%`;
+      document.getElementById('status-note').textContent = total
+        ? `${ativas} rota(s) ativa(s) e ${inativas} inativa(s), de um total de ${total} rota(s).`
+        : 'Não há dados para exibir o status.';
+    }
+
+    function exibirTabela(dados) {
+      const tbody = document.getElementById('tbody-rotas');
+      const emptyEl = document.getElementById('empty-filter');
+      tbody.innerHTML = '';
+
+      dados.forEach(r => {
+        const ativa = normalizar(r.status_rota) === 'ativa';
+        const tr = document.createElement('tr');
+
+        const valores = [
+          { text: r.id ?? 'N/D', className: 'route-id' },
+          { text: r.tipo || 'N/D', badge: 'badge-tipo' },
+          { text: r.status_rota || 'N/D', badge: ativa ? 'badge-ativa' : 'badge-inativa' },
+          { text: `${r.cidade_origem || 'N/D'} → ${r.cidade_destino || 'N/D'}` },
+          { text: `${formatarHorario(r.horario_ida_previsto)} - ${formatarHorario(r.horario_retorno_previsto)}` }
+        ];
+
+        valores.forEach(item => {
+          const td = document.createElement('td');
+          if (item.badge) {
+            const span = document.createElement('span');
+            span.className = `badge ${item.badge}`;
+            span.textContent = item.text;
+            td.appendChild(span);
+          } else {
+            td.textContent = item.text;
+            if (item.className) td.className = item.className;
+          }
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      emptyEl.hidden = dados.length !== 0;
+    }
+
+    function filtrarTabela() {
+      const termo = normalizar(document.getElementById('searchInput').value);
+      const filtradas = todasAsRotas.filter(r => {
+        const campos = [
+          r.id, r.tipo, r.status_rota, r.cidade_origem,
+          r.cidade_destino, r.horario_ida_previsto, r.horario_retorno_previsto
+        ];
+        return campos.some(campo => normalizar(campo).includes(termo));
+      });
+      exibirTabela(filtradas);
+    }
+
+    carregarDados();
+  </script>
+</body>
+</html>
