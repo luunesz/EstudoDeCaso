@@ -38,7 +38,7 @@ th{background:var(--brown);color:var(--cream);text-align:left;padding:10px 12px}
 .br i{display:block;height:14px;border-radius:8px;background:var(--brown)}.br em{font-style:normal;font-weight:800;text-align:right}
 .st{font-size:.82rem;font-weight:800;padding:3px 12px;border-radius:99px;display:inline-block;background:var(--cream);color:var(--brown)}.st.err{background:#FCE3DA;color:#7A2E1A}
 nav{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 20px;background:var(--cream);border-top:2px solid var(--line);z-index:5}
-nav button{border:2px solid var(--tan);background:transparent;border-radius:12px;padding:6px 14px;font:800 1rem 'Nunito';color:var(--brown);cursor:pointer}nav button:hover{background:var(--orange);color:#fff}
+nav button{border:2px solid var(--tan);background:transparent;border-radius:12px;padding:6px 14px;font:800 1rem 'Nunito';color:var(--brown);cursor:pointer}nav a.pdf{border:2px solid var(--tan);border-radius:12px;padding:6px 14px;font:800 1rem 'Nunito';color:var(--brown);text-decoration:none}nav a.pdf:hover{background:var(--orange);color:#fff}nav button:hover{background:var(--orange);color:#fff}
 #pos{font-weight:800;color:var(--soft);margin-left:auto}
 @media(max-width:820px){.g2,.g4,.cover.on,.ctx.on{grid-template-columns:1fr}.s{padding:20px 16px 12px}.cl{padding:28px 20px}.cr svg{width:100%;margin:0}}
 @page{size:1280px 720px;margin:0}
@@ -223,7 +223,7 @@ if (dados.length === 0) return mostrarVazio();</pre>
 </section>
 
 <section class="s dk" style="align-items:center;justify-content:center;text-align:center"><h1>Obrigado<br>pela atenção</h1></section>
-<nav><button id="ant" aria-label="Anterior">◀</button><button id="prox" aria-label="Próximo">▶</button><button onclick="print()">⬇ PDF</button><span class="soft">← → ou espaço · F tela cheia</span><span id="pos"></span></nav>
+<nav><button id="ant" aria-label="Anterior">◀</button><button id="prox" aria-label="Próximo">▶</button><a class="pdf" href="apresentacao_transporte_escolar.pdf" target="_blank" rel="noopener">📄 Abrir PDF</a><span class="soft">← → ou espaço · F tela cheia</span><span id="pos"></span></nav>
 
 <script>
 /* Apenas chaves publicáveis (anon). A chave secreta NUNCA entra aqui. */
