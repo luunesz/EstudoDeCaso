@@ -37,6 +37,7 @@ th{background:var(--brown);color:var(--cream);text-align:left;padding:10px 12px}
 .br{display:flex;flex-direction:column;gap:6px;margin-top:10px}.br div{display:grid;grid-template-columns:minmax(80px,32%) 1fr 34px;gap:8px;align-items:center;font-size:.82rem;font-weight:700}
 .br i{display:block;height:14px;border-radius:8px;background:var(--brown)}.br em{font-style:normal;font-weight:800;text-align:right}
 .st{font-size:.82rem;font-weight:800;padding:3px 12px;border-radius:99px;display:inline-block;background:var(--cream);color:var(--brown)}.st.err{background:#FCE3DA;color:#7A2E1A}
+.lk{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 14px;border:2px dashed var(--brown);border-radius:16px;background:var(--cream);color:var(--brown);font-weight:800;font-size:.9rem;text-decoration:none}.lk code{background:rgba(139,74,19,.12);color:var(--brown)}.lk span{margin-left:auto}.lk:hover{background:var(--orange);color:#fff;border-color:var(--orange)}.lk:hover code{color:#fff;background:rgba(255,255,255,.25)}
 nav{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 20px;background:var(--cream);border-top:2px solid var(--line);z-index:5}
 nav button{border:2px solid var(--tan);background:transparent;border-radius:12px;padding:6px 14px;font:800 1rem 'Nunito';color:var(--brown);cursor:pointer}nav a.pdf{border:2px solid var(--tan);border-radius:12px;padding:6px 14px;font:800 1rem 'Nunito';color:var(--brown);text-decoration:none}nav a.pdf:hover{background:var(--orange);color:#fff}nav button:hover{background:var(--orange);color:#fff}
 #pos{font-weight:800;color:var(--soft);margin-left:auto}
@@ -117,7 +118,7 @@ horario_ida_previsto
 horario_retorno_previsto
 
 GRANT SELECT ON vw_dash_rota TO anon;</pre></div>
-    <div class="card" data-dash="rota"><h3>(b) Painel de Rotas</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div></div>
+    <div class="card" data-dash="rota"><h3>(b) Painel de Rotas</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div><a class="lk" href="rota.html" target="_blank" rel="noopener">🔗 Abrir painel de Rotas <code>rota.html</code><span>↗</span></a></div>
   </div>
 </section>
 
@@ -135,7 +136,7 @@ onibus_placa, onibus_cor
 rota_tipo
 
 GRANT SELECT ON vw_detalhes_viagem TO anon;</pre></div>
-    <div class="card" data-dash="viagem"><h3>(b) Painel de Viagens</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div></div>
+    <div class="card" data-dash="viagem"><h3>(b) Painel de Viagens</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div><a class="lk" href="EventoViagem_att.html" target="_blank" rel="noopener">🔗 Abrir painel de Viagens <code>EventoViagem_att.html</code><span>↗</span></a></div>
   </div>
 </section>
 
@@ -161,7 +162,7 @@ GROUP BY a.cpf, a.serie;
 
 GRANT SELECT ON vw_dash_presenca TO anon;
 GRANT SELECT ON vw_dash_aluno TO anon;</pre></div>
-    <div class="card" data-dash="presenca"><h3>(b) Painel de Presenças</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div></div>
+    <div class="card" data-dash="presenca"><h3>(b) Painel de Presenças</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div><a class="lk" href="Evento_presenca.html" target="_blank" rel="noopener">🔗 Abrir painel de Presenças <code>Evento_presenca.html</code><span>↗</span></a></div>
   </div>
 </section>
 
@@ -179,7 +180,7 @@ FROM Multa;
 
 REVOKE ALL ON vw_dash_multa FROM anon, authenticated;
 GRANT SELECT ON vw_dash_multa TO anon;</pre></div>
-    <div class="card" data-dash="multa"><h3>(b) Painel de Multas</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div></div>
+    <div class="card" data-dash="multa"><h3>(b) Painel de Multas</h3><span class="st">carregando…</span><div class="kp"></div><div class="br"></div><a class="lk" href="Multa.html" target="_blank" rel="noopener">🔗 Abrir painel de Multas <code>Multa.html</code><span>↗</span></a></div>
   </div>
 </section>
 
